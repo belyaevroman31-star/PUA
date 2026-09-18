@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Электросово">
+<meta name="description" content="Офлайн-справочник по нормам электромонтажа в квартирах и частных домах. ПУЭ-7, ГОСТ Р 50571, СП 256.">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon-192x192.svg">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>Справочник электромонтажника</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f13;--panel:#161920;--panel2:#1b1f27;
+  --bdr:rgba(255,255,255,.09);--bdr2:rgba(255,255,255,.05);
+  --am:#f5b400;--amb:#ffcf40;--cop:#c17a4a;
+  --txt:#eef1f5;--mut:#8b93a1;--dng:#e2574c;
+  --ok:#178a3b;--warn:#d4930a;--blue:#4a90d9;
+  --safe-b:env(safe-area-inset-bottom);
+}
+html,body{margin:0;padding:0;overflow-x:hidden;-webkit-text-size-adjust:100%}
+body{
+  background:radial-gradient(ellipse at top left,rgba(245,180,0,.06),transparent 45%),
+  radial-gradient(ellipse at bottom right,rgba(193,122,74,.07),transparent 50%),var(--bg);
+  color:var(--txt);font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  padding:16px 16px calc(72px + var(--safe-b));
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+.app{max-width:700px;margin:0 auto}
+
+.splash{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s}
+.splash.hide{opacity:0;pointer-events:none}
+.splash svg{width:80px;height:80px;margin-bottom:16px}
+.splash p{color:var(--mut);font-size:14px;font-weight:600}
+
+.offline-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:80;background:var(--dng);color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:600}
+.offline-banner.show{display:block}
+
+.install-banner{display:none;position:fixed;bottom:calc(68px + var(--safe-b));left:12px;right:12px;background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--am);border-radius:14px;padding:16px;z-index:100;box-shadow:0 8px 30px rgba(245,180,0,.2)}
+.install-banner.show{display:block}
+.install-banner p{font-size:14px;margin-bottom:12px}
+.install-banner .row{display:flex;gap:8px}
+.install-banner button{flex:1;padding:12px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+.inst{background:var(--am);color:#0d0f13}
+.inst2{background:var(--panel2);color:var(--mut);border:1px solid var(--bdr)!important}
+
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--bdr);display:flex;padding:6px 0 calc(6px + var(--safe-b));z-index:90}
+.nbtn{flex:1;background:none;border:none;color:var(--mut);font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;transition:color .2s}
+.nbtn.a{color:var(--am)}
+.nbtn svg{width:22px;height:22px}
+
+header{margin-bottom:16px}
+.eye{font-size:11px;letter-spacing:.12em;color:var(--cop);text-transform:uppercase;margin:0 0 6px;display:flex;align-items:center;gap:6px;font-weight:600}
+.eye::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--am);box-shadow:0 0 6px 1px var(--am)}
+h1{font-weight:800;font-size:clamp(22px,5vw,28px);line-height:1.2;margin:0 0 6px}
+.sub{color:var(--mut);font-size:13px;line-height:1.4;margin:0}
+
+.wire{width:100%;height:10px;margin:14px 0;opacity:.5}
+
+.pnl{background:var(--panel);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+
+.tg-wrap{margin-bottom:14px}
+.tg{display:grid;grid-template-columns:1fr 1fr;width:100%;background:var(--panel);border:1px solid var(--bdr);border-radius:10px;padding:3px;position:relative}
+.tg .th{position:absolute;top:3px;left:3px;width:calc(50% - 3px);height:calc(100% - 6px);background:linear-gradient(180deg,var(--amb),var(--am));border-radius:7px;transition:transform .25s cubic-bezier(.65,0,.35,1);box-shadow:0 3px 10px rgba(245,180,0,.25)}
+.tg.on .th{transform:translateX(100%)}
+.mbtn{position:relative;z-index:1;background:transparent;border:none;padding:10px 8px;font-weight:700;font-size:14px;color:var(--mut);cursor:pointer;border-radius:7px;transition:color .2s}
+.mbtn.a{color:#0d0f13}
+.tg-h{font-size:11px;color:var(--mut);margin-top:5px}
+
+.f-label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:0 0 5px}
+.f{margin-bottom:12px}
+input[type="number"],input[type="text"],input[type="tel"],select{
+  width:100%;background:var(--panel2);border:1px solid var(--bdr);border-radius:8px;
+  color:var(--txt);font-size:16px;padding:12px;transition:border-color .15s;
+}
+input:focus,select:focus{outline:none;border-color:var(--am)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b93a1' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+.cat{background:var(--panel);border:1px solid var(--bdr);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.cat-h{background:var(--panel2);padding:13px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .2s;border-bottom:1px solid var(--bdr2)}
+.cat-h:active{background:rgba(245,180,0,.08)}
+.cat-h h2{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.cat-h .arr{font-size:10px;transition:transform .3s;color:var(--am)}
+.cat-h.a .arr{transform:rotate(180deg)}
+.cat-b{padding:0;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .2s ease}
+.cat-b.open{padding:12px 14px;max-height:100000px}
+
+.sw{margin-bottom:14px;position:relative}
+.sw input{width:100%;background:var(--panel2);border:1px solid var(--bdr);border-radius:10px;color:var(--txt);font-size:14px;padding:12px 12px 12px 38px}
+.sw svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut)}
+
+.cl{list-style:none}
+.cl li{padding:14px;border-bottom:1px solid var(--bdr2);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;transition:background .2s}
+.cl li:active{background:rgba(245,180,0,.06)}
+.cl li .ci{font-size:18px}
+.cl li .cc{margin-left:auto;font-size:11px;color:var(--mut);background:var(--panel2);padding:2px 8px;border-radius:10px}
+
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.btn{padding:14px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.bp{background:linear-gradient(180deg,var(--amb),var(--am));color:#0d0f13}
+.bp:active{transform:scale(.97)}
+.bs{background:var(--panel2);border:1px solid var(--bdr);color:var(--txt)}
+.bs:active{border-color:var(--am)}
+.bf{grid-column:1/-1}
+
+.toast{position:fixed;bottom:calc(76px + var(--safe-b));left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--am);border-radius:10px;padding:12px 20px;font-size:13px;color:var(--amb);z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.s{opacity:1}
+
+.pg{display:none}.pg.a{display:block}
+
+.gtot{background:linear-gradient(165deg,var(--panel),var(--panel2));border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:14px 0;display:flex;justify-content:space-between;align-items:center}
+.gtot h2{font-size:14px;font-weight:800}
+.gtot .a{font-size:clamp(20px,5vw,26px);font-weight:800;color:var(--amb);text-shadow:0 0 12px rgba(255,207,64,.3)}
+
+/* ---- Content styling (dark) ---- */
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.s-title{margin:24px 0 8px;font-size:18px;font-weight:700;color:var(--amb);display:flex;align-items:center;gap:8px}
+.s-title .n{background:var(--am);color:#0d0f13;font-size:11px;padding:3px 8px;border-radius:5px;letter-spacing:.4px}
+.s-lead{color:var(--mut);font-size:13px;margin:0 0 14px;line-height:1.5}
+
+.card{background:var(--panel);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-size:15px;color:var(--txt)}
+.card h4{margin:14px 0 6px;font-size:13px;color:var(--am)}
+.card p{margin:6px 0;font-size:13px;line-height:1.5}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.feat{background:var(--panel);border:1px solid var(--bdr);border-radius:12px;padding:14px}
+.feat .big{font-size:26px;font-weight:800;color:var(--am)}
+.feat .cap{font-size:11px;color:var(--mut);margin-top:2px}
+.feat .ttl{font-weight:600;font-size:13px;margin:4px 0}
+
+.tbl-scroll{overflow-x:auto;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:12px;background:var(--panel2)}
+th,td{border:1px solid var(--bdr);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--panel);font-weight:600;color:var(--am);white-space:nowrap;font-size:11px}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num,th.num{text-align:center;white-space:nowrap}
+table.wrap th{white-space:normal}
+caption{caption-side:top;text-align:left;font-size:11px;color:var(--mut);padding:4px 2px}
+
+.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600;vertical-align:middle}
+.b-dng{background:rgba(226,87,76,.15);color:var(--dng)}
+.b-ok{background:rgba(23,138,59,.15);color:var(--ok)}
+.b-blue{background:rgba(74,144,217,.15);color:var(--blue)}
+.b-amber{background:rgba(245,180,0,.12);color:var(--warn)}
+.pue{font-size:10px;color:var(--mut);font-weight:400}
+
+.note{border-left:3px solid var(--blue);background:rgba(74,144,217,.08);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px;line-height:1.5}
+.warn-note{border-left:3px solid var(--am);background:rgba(245,180,0,.06);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px;line-height:1.5;color:var(--amb)}
+.ok-note{border-left:3px solid var(--ok);background:rgba(23,138,59,.06);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px;line-height:1.5}
+
+ul.tight{margin:6px 0;padding-left:18px;font-size:12px;line-height:1.6}
+ul.tight li{margin:3px 0}
+ul.tight li b{color:var(--amb)}
+
+pre{background:var(--panel2);border:1px solid var(--bdr);border-radius:8px;padding:10px;font-size:11px;overflow-x:auto;color:var(--mut);line-height:1.6;margin:8px 0;font-family:monospace}
+
+.step{display:flex;gap:10px;margin:10px 0;align-items:flex-start}
+.step .num{flex:0 0 24px;height:24px;border-radius:50%;background:var(--am);color:#0d0f13;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.step .body{flex:1;font-size:12px;line-height:1.5}
+.step .body b{display:block;font-size:13px;color:var(--amb)}
+
+.kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.kv .it{background:var(--panel2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;font-size:11px}
+
+mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius:2px}
+
+.cb{font-size:13px;display:flex;align-items:flex-start;gap:6px;cursor:pointer;padding:4px 0}
+.cb input{margin-top:3px;accent-color:var(--am)}
+
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.calc{grid-template-columns:1fr}}
+.calc label{display:block;font-size:11px;color:var(--mut);margin:6px 0 2px;font-weight:600}
+.calc .res{background:rgba(245,180,0,.06);border:1px solid var(--bdr);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;line-height:1.5}
+.calc .res b{color:var(--amb)}
+.calc .res span.ok{color:var(--ok);font-weight:700}
+.calc .res span.dng{color:var(--dng);font-weight:700}
+.calc button{margin-top:12px;background:var(--am);color:#0d0f13;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%}
+.calc button:active{transform:scale(.97)}
+
+.radio-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.radio-row label{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--mut);cursor:pointer}
+
+.footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--bdr);font-size:11px;color:var(--mut);line-height:1.5}
+
+@media print{
+  body{background:#fff;color:#000;padding:10px}
+  .card,.pnl{background:#fff;border:1px solid #ddd}
+  .cat-h{background:#f5f5f5;color:#000}
+  .bnav,.install-banner,.acts,.sw,.offline-banner,.splash{display:none!important}
+  .cat-b{max-height:none!important;padding:12px!important}
+  th{color:#333;background:#eee}
+  table{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <svg viewBox="0 0 192 192" fill="none"><rect width="192" height="192" rx="40" fill="#161920"/><path d="M100 30L80 100l30 0-25 65 35-75-30 0z" fill="#f5b400"/></svg>
+  <p>Справочник электромонтажника</p>
+</div>
+
+<div class="offline-banner" id="offlineBanner">Нет соединения — справочник доступен офлайн</div>
+
+<div class="app">
+
+<!-- ==================== PAGE: СПРАВОЧНИК ==================== -->
+<div class="pg a" id="pRef">
+  <header>
+    <p class="eye">Электромонтаж · ПУЭ-7</p>
+    <h1>Справочник электромонтажника</h1>
+    <p class="sub">Нормы для квартир и частных домов</p>
+  </header>
+  <svg class="wire" viewBox="0 0 1000 10" preserveAspectRatio="none"><line x1="0" y1="5" x2="1000" y2="5" stroke="#c17a4a" stroke-width="1" stroke-dasharray="2 6"/><circle cx="20" cy="5" r="2.5" fill="#f5b400"/><circle cx="500" cy="5" r="2.5" fill="#c17a4a"/><circle cx="980" cy="5" r="2.5" fill="#f5b400"/></svg>
+
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="feat"><div class="big">0,4 с</div><div class="ttl">Отключение</div><div class="cap">220 В, TN (1.7.1)</div></div>
+    <div class="feat"><div class="big">30 мА</div><div class="ttl">УЗО розетки</div><div class="cap">зона 3 ванной (7.1.82)</div></div>
+    <div class="feat"><div class="big">2,5 мм²</div><div class="ttl">Розетки</div><div class="cap">мин. медь</div></div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="acts">
+    <button class="btn bs" onclick="expAll()">Развернуть все</button>
+    <button class="btn bs" onclick="colAll()">Свернуть все</button>
+  </div>
+
+  <div class="note"><b>Статус.</b> ПУЭ не зарегистрированы в Минюсте с 2023 г., но остаются базой для монтажа.</div>
+  <div class="ok-note"><b>Совместимость.</b> Гл. 7.1 дополнена ГОСТ Р 50571, СП 256.1325800.2016.</div>
+  <div class="footer">Справочник носит информационный характер. Сентябрь 2026.</div>
+</div>
+
+<!-- ==================== PAGE: ПОИСК ==================== -->
+<div class="pg" id="pSearch">
+  <header>
+    <p class="eye">Навигация</p>
+    <h1>Поиск по справочнику</h1>
+  </header>
+  <div class="sw">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="search" placeholder="Найти раздел, таблицу, пункт..." autocomplete="off">
+  </div>
+  <div id="sResults" style="font-size:13px;color:var(--mut);padding:20px;text-align:center">Введите запрос для поиска по всем разделам</div>
+</div>
+
+<!-- ==================== PAGE: КАЛЬКУЛЯТОРЫ ==================== -->
+<div class="pg" id="pCalc">
+  <header>
+    <p class="eye">Инструменты</p>
+    <h1>Калькуляторы</h1>
+  </header>
+
+  <div class="card">
+    <h3>Подбор сечения и автомата</h3>
+    <div class="calc">
+      <div>
+        <label>Мощность, кВт</label>
+        <input id="calcP" type="number" value="3.0" step="0.1" min="0">
+        <label>Сеть</label>
+        <select id="calcNet"><option value="1">1ф 220 В</option><option value="3">3ф 380 В</option></select>
+        <label>cos φ</label>
+        <input id="calcCos" type="number" value="0.95" step="0.01" min="0.5" max="1">
+      </div>
+      <div>
+        <label>Прокладка</label>
+        <select id="calcHide"><option value="2">Скрыто, 2 жилы</option><option value="3">Скрыто, 3 жилы каб.</option><option value="0">Открыто</option></select>
+        <label><input type="checkbox" id="calcLong" onchange="calcWire()"> Запас +30 %</label>
+        <button onclick="calcWire()">Рассчитать</button>
+      </div>
+    </div>
+    <div class="res" id="resWire" style="margin-top:10px;background:var(--panel2);border:1px solid var(--bdr);border-radius:8px;padding:10px;font-size:12px">Введите мощность и нажмите «Рассчитать».</div>
+  </div>
+
+  <div class="card">
+    <h3>Падение напряжения</h3>
+    <div class="calc">
+      <div>
+        <label>Длина, м</label>
+        <input id="dropL" type="number" value="30" step="1" min="1">
+        <label>Ток, А</label>
+        <input id="dropI" type="number" value="16" step="1" min="0">
+      </div>
+      <div>
+        <label>Сечение, мм²</label>
+        <select id="dropS"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option><option>10</option><option>16</option><option>25</option></select>
+        <label>Напряжение, В</label>
+        <select id="dropU"><option selected>220</option><option>380</option><option>230</option></select>
+        <button onclick="calcDrop()">Рассчитать</button>
+      </div>
+    </div>
+    <div class="res" id="resDrop" style="margin-top:10px;background:var(--panel2);border:1px solid var(--bdr);border-radius:8px;padding:10px;font-size:12px">Введите параметры и нажмите «Рассчитать».</div>
+  </div>
+
+  <div class="card">
+    <h3>Подбор УЗО</h3>
+    <div class="calc">
+      <div>
+        <label>Автомат, А</label>
+        <select id="uzoIn"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option><option>63</option></select>
+        <button onclick="calcUzo()">Подобрать</button>
+      </div>
+      <div>
+        <div class="res" id="resUzo" style="background:var(--panel2);border:1px solid var(--bdr);border-radius:8px;padding:10px;font-size:12px">Выберите номинал и нажмите «Подобрать».</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE: ЧЕК-ЛИСТ ==================== -->
+<div class="pg" id="pCheck">
+  <header>
+    <p class="eye">Контроль</p>
+    <h1>Чек-лист и проверки</h1>
+  </header>
+
+  <div class="card">
+    <h3>Этап 1 — Проектирование</h3>
+    <label class="cb"><input type="checkbox"> Расчётная нагрузка и группы</label>
+    <label class="cb"><input type="checkbox"> Система заземления выбрана</label>
+    <label class="cb"><input type="checkbox"> Однолинейная схема щита</label>
+  </div>
+  <div class="card">
+    <h3>Этап 2 — Трассировка</h3>
+    <label class="cb"><input type="checkbox"> Расстояния до труб (50/100/400 мм)</label>
+    <label class="cb"><input type="checkbox"> Вертикали и горизонтали</label>
+    <label class="cb"><input type="checkbox"> Скрытые работы сфотографированы</label>
+  </div>
+  <div class="card">
+    <h3>Этап 3 — Монтаж</h3>
+    <label class="cb"><input type="checkbox"> Кабель ВВГнг-LS/NYM</label>
+    <label class="cb"><input type="checkbox"> Соединения в коробках</label>
+    <label class="cb"><input type="checkbox"> Маркировка L/N/PE по цвету</label>
+    <label class="cb"><input type="checkbox"> Сечения ↔ автоматы согласованы</label>
+    <label class="cb"><input type="checkbox"> УЗО на розетки и ванную</label>
+    <label class="cb"><input type="checkbox"> Уравнивание потенциалов в ванной</label>
+  </div>
+  <div class="card">
+    <h3>Этап 4 — Проверка</h3>
+    <label class="cb"><input type="checkbox"> Мегаомметр: изоляция ≥ 0,5 МОм</label>
+    <label class="cb"><input type="checkbox"> Петля «фаза-нуль» ≤ 0,4 с</label>
+    <label class="cb"><input type="checkbox"> Кнопка «ТЕСТ» УЗО</label>
+    <label class="cb"><input type="checkbox"> Нагрузка на каждой линии</label>
+  </div>
+
+  <div class="card">
+    <h3>Объём испытаний <span class="pue">(гл. 1.8 ПУЭ)</span></h3>
+    <div class="tbl-scroll">
+    <table>
+      <tr><th>Испытание</th><th>Метод</th><th class="num">Норма</th></tr>
+      <tr><td>Изоляция</td><td>Мегаомметр 500 В</td><td class="num">≥ 0,5 МОм</td></tr>
+      <tr><td>Петля фаза-нуль</td><td>Прибор петли</td><td class="num">≤ 0,4 с</td></tr>
+      <tr><td>Заземлитель (TT)</td><td>Изм. R</td><td class="num">Ra×Ia ≤ 50 В</td></tr>
+      <tr><td>УЗО</td><td>Кнопка ТЕСТ</td><td class="num">IΔn за ≤ 0,04 с</td></tr>
+      <tr><td>Жилы</td><td>Прозвонка</td><td class="num">целостность</td></tr>
+      <tr><td>Фазировка</td><td>Мультиметр</td><td class="num">L, N, PE верно</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Типовые ошибки</h3>
+    <div class="tbl-scroll">
+    <table>
+      <tr><th>Ошибка</th><th>Последствие</th><th>Решение</th></tr>
+      <tr><td>ПВС/ПУНП вместо ВВГнг-LS</td><td>Пожар</td><td>ВВГнг-LS/NYM</td></tr>
+      <tr><td>Нет PE (2 жилы)</td><td>Поражение током</td><td>3-проводная группа</td></tr>
+      <tr><td>УЗО без автомата</td><td>Нет защиты от КЗ</td><td>Автомат + УЗО / дифф</td></tr>
+      <tr><td>N+PE после разделения</td><td>Ложные УЗО</td><td>Раздельные шины</td></tr>
+      <tr><td>Медь–алюминий напрямую</td><td>Коррозия, обрыв</td><td>Клеммники Cu/Al</td></tr>
+      <tr><td>Автомат 25А на 1,5 мм²</td><td>Нагрев провода</td><td>Соответствие сечения</td></tr>
+      <tr><td>Розетки в зоне 0–2</td><td>Удар током</td><td>Зона 3, IP44, УЗО</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="warn-note"><b>До 50 В AC / 120 В DC</b> — защита от косвенного прикосновения не требуется <span class="pue">(1.7.53)</span>.</div>
+</div>
+
+</div><!-- .app -->
+
+<div class="install-banner" id="iBan"><p>Установить справочник на экран?</p><div class="row"><button class="inst" onclick="instApp()">Установить</button><button class="inst2" onclick="disInst()">Позже</button></div></div>
+<div class="toast" id="toast"></div>
+
+<nav class="bnav">
+  <button class="nbtn a" onclick="sP('pRef',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/></svg>
+    Справочник</button>
+  <button class="nbtn" onclick="sP('pSearch',this);document.getElementById('search').focus()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    Поиск</button>
+  <button class="nbtn" onclick="sP('pCalc',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/></svg>
+    Калькуляторы</button>
+  <button class="nbtn" onclick="sP('pCheck',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Чек-лист</button>
+</nav>
+
+<script>
+var SD=[
+{c:"Системы заземления",i:"⚡",d:[
+"<h3>TN-C <span class='badge b-dng'>устаревшая</span></h3><ul class='tight'><li>PEN по всей длине</li><li>УЗО <b>запрещены</b> <span class='pue'>(1.7.80)</span></li></ul>",
+"<h3>TN-S <span class='badge b-ok'>рекомендуется</span></h3><ul class='tight'><li>PE и N разделены от подстанции</li><li>5-проводная линия</li></ul>",
+"<h3>TN-C-S <span class='badge b-ok'>оптимальна</span></h3><ul class='tight'><li>PEN до ВРУ → разделение на PE+N <span class='pue'>(1.7.57, 7.1.13)</span></li><li>Обратное объединение запрещено <span class='pue'>(1.7.135)</span></li></ul>",
+"<h3>TT <span class='badge b-blue'>частные дома</span></h3><ul class='tight'><li>Независимый контур <span class='pue'>(1.7.59)</span></li><li>Обязательно УЗО на вводе</li><li>Ra×Ia ≤ 50 В</li></ul>",
+"<div class='warn-note'><b>PEN запрещён</b> в однофазных цепях <span class='pue'>(1.7.132)</span>.</div>"]},
+{c:"Выбор проводников",i:"📐",d:[
+"<h3>Медь ПВХ — табл. 1.3.4</h3><div class='tbl-scroll'><table><tr><th>мм²</th><th class='num'>откр.</th><th class='num'>2ж</th><th class='num'>3ж</th><th class='num'>каб.3ж</th></tr><tr><td>1,5</td><td class='num'>23</td><td class='num'>19</td><td class='num'>17</td><td class='num'>15</td></tr><tr><td>2,5</td><td class='num'>30</td><td class='num'>27</td><td class='num'>25</td><td class='num'>21</td></tr><tr><td>4</td><td class='num'>41</td><td class='num'>38</td><td class='num'>35</td><td class='num'>27</td></tr><tr><td>6</td><td class='num'>50</td><td class='num'>46</td><td class='num'>42</td><td class='num'>34</td></tr><tr><td>10</td><td class='num'>80</td><td class='num'>70</td><td class='num'>60</td><td class='num'>50</td></tr><tr><td>16</td><td class='num'>100</td><td class='num'>85</td><td class='num'>80</td><td class='num'>70</td></tr></table></div>",
+"<h3>Кабели — табл. 1.3.6</h3><div class='tbl-scroll'><table><tr><th>мм²</th><th class='num'>1ж воздух</th><th class='num'>2ж воздух</th><th class='num'>2ж земля</th><th class='num'>3ж воздух</th><th class='num'>3ж земля</th></tr><tr><td>1,5</td><td class='num'>23</td><td class='num'>19</td><td class='num'>33</td><td class='num'>19</td><td class='num'>27</td></tr><tr><td>2,5</td><td class='num'>30</td><td class='num'>27</td><td class='num'>44</td><td class='num'>25</td><td class='num'>38</td></tr><tr><td>4</td><td class='num'>41</td><td class='num'>38</td><td class='num'>55</td><td class='num'>35</td><td class='num'>49</td></tr><tr><td>6</td><td class='num'>50</td><td class='num'>50</td><td class='num'>70</td><td class='num'>42</td><td class='num'>60</td></tr><tr><td>10</td><td class='num'>80</td><td class='num'>70</td><td class='num'>105</td><td class='num'>55</td><td class='num'>90</td></tr><tr><td>16</td><td class='num'>100</td><td class='num'>90</td><td class='num'>135</td><td class='num'>75</td><td class='num'>115</td></tr></table></div>",
+"<h3>Автомат ↔ сечение</h3><div class='tbl-scroll'><table><tr><th>Автомат, А</th><th class='num'>10</th><th class='num'>16</th><th class='num'>20</th><th class='num'>25</th><th class='num'>32</th><th class='num'>40</th></tr><tr><td>Cu, мм²</td><td class='num'>1,5</td><td class='num'>2,5</td><td class='num'>4</td><td class='num'>6</td><td class='num'>10</td><td class='num'>16</td></tr></table></div>",
+"<h3>Цвета жил</h3><ul class='tight'><li><b style='color:#4a90d9'>Голубой</b> — N</li><li><b style='color:#178a3b'>Зелёно-жёлтый</b> — PE</li><li><b style='color:#e2574c'>Коричневый/чёрный/красный</b> — фазы L</li></ul><p class='pue'>(2.1.31, ГОСТ Р 50462)</p>"]},
+{c:"Электропроводки",i:"🔌",d:[
+"<h3>Открытая проводка</h3><ul class='tight'><li>Высота незащищённых >42В: обычные ≥2м, опасные ≥2,5м <span class='pue'>(2.1.52)</span></li><li>Защищённые — высота не нормируется (2.1.54)</li></ul>",
+"<h3>Скрытая проводка</h3><ul class='tight'><li>В каналах — замена проводов <span class='pue'>(2.1.19)</span></li><li>За потолками = скрытая <span class='pue'>(7.1.38)</span></li></ul>",
+"<h3>Расстояния <span class='badge b-dng'>критично</span></h3><div class='tbl-scroll'><table><tr><th>Ситуация</th><th class='num'>Норма</th><th class='pue'>ПУЭ</th></tr><tr><td>Пересечение с трубами</td><td class='num'>≥50 мм</td><td class='pue'>2.1.56</td></tr><tr><td>Пересечение с газом</td><td class='num'>≥100 мм</td><td class='pue'>2.1.56</td></tr><tr><td>Параллельно трубам</td><td class='num'>≥100 мм</td><td class='pue'>2.1.57</td></tr><tr><td>Параллельно газу</td><td class='num'>≥400 мм</td><td class='pue'>2.1.57</td></tr><tr><td>По сгораемым основаниям</td><td class='num'>подложка ≥10 мм</td><td class='pue'>2.1.37</td></tr><tr><td>Заполнение глухого короба</td><td class='num'>≤35 %</td><td class='pue'>2.1.61</td></tr></table></div>",
+"<h3>Соединения жил</h3><ul class='tight'><li>Опрессовка, сварка, пайка, сжимы <span class='pue'>(2.1.21)</span></li><li>Место доступно для осмотра <span class='pue'>(2.1.23)</span></li><li>Соединения только в коробках/нишах <span class='pue'>(2.1.26)</span></li></ul>",
+"<h3>Особенности гл. 7.1</h3><ul class='tight'><li>Групповые — трёхпроводные L,N,PE <span class='pue'>(7.1.36)</span></li><li>Вертикальные участки в квартирах запрещены <span class='pue'>(7.1.35)</span></li><li>В ванных — скрытая; металлические оболочки запрещены <span class='pue'>(7.1.40)</span></li><li>Проводка на чердаках — гл. 2; IP44 на чердаке <span class='pue'>(7.1.53, 7.1.58)</span></li></ul>",
+"<div class='note'><b>Деревянные дома:</b> открытая на роликах/изоляторах; скрыто — несгораемый слой ≥10 мм; кабель ВВГнг-LS/NYM, металлические гильзы в проходах.</div>"]},
+{c:"Автоматы и защита",i:"🔧",d:[
+"<h3>Характеристики автоматов</h3><div class='tbl-scroll'><table><tr><th>Тип</th><th class='num'>I/Iном</th><th>Применение</th></tr><tr><td>B</td><td class='num'>3–5</td><td>Освещение, длинные линии</td></tr><tr><td>C</td><td class='num'>5–10</td><td><b>Стандарт для жилья</b></td></tr><tr><td>D</td><td class='num'>10–20</td><td>Электродвигатели</td></tr></table></div>",
+"<h3>Кратности к I проводника</h3><div class='tbl-scroll'><table><tr><th>Защита</th><th>Аппарат</th><th class='num'>Кратность</th><th class='pue'>ПУЭ</th></tr><tr><td>Только КЗ</td><td>Плавкая вставка</td><td class='num'>≤300%</td><td class='pue'>3.1.9</td></tr><tr><td>Только КЗ</td><td>Автомат (отсечка)</td><td class='num'>≤450%</td><td class='pue'>3.1.9</td></tr><tr><td>КЗ + перегрузка</td><td>Автомат</td><td class='num'>≤100%</td><td class='pue'>3.1.11</td></tr></table></div>",
+"<h3>Типовой щит</h3><div class='tbl-scroll'><table><tr><th>Группа</th><th class='num'>Авт.</th><th class='num'>Cu</th><th>УЗО</th></tr><tr><td>Освещение</td><td class='num'>C10</td><td class='num'>1,5</td><td>—</td></tr><tr><td>Розетки</td><td class='num'>C16</td><td class='num'>2,5</td><td>30 мА</td></tr><tr><td>Кухня</td><td class='num'>C16</td><td class='num'>2,5</td><td>30 мА</td></tr><tr><td>Ванная</td><td class='num'>C16</td><td class='num'>2,5</td><td>10/30 мА A</td></tr><tr><td>Плита</td><td class='num'>C32</td><td class='num'>6</td><td>отд. линия</td></tr><tbody id='condRows'></tbody></table></div><div style='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap'><span style='font-size:12px;color:var(--mut);font-weight:600'>Кондиционеры:</span><select id='condCount' onchange='onCond()' style='width:auto'><option>0</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select><span id='condSum' style='font-size:12px;color:var(--am);font-weight:600'></span></div><div id='condNote' class='pue' style='margin-top:4px'></div>"]},
+{c:"УЗО и диффавтоматы",i:"🛡️",d:[
+"<h3>Обязательные случаи</h3><ul class='tight'><li>Розетки — УЗО ≤30 мА <span class='pue'>(7.1.79)</span></li><li>Зона 3 ванной — УЗО ≤30 мА <span class='pue'>(7.1.82)</span></li><li>Ввод — до 300 мА (противопожарное) <span class='pue'>(7.1.84)</span></li></ul>",
+"<h3>Требования</h3><div class='tbl-scroll'><table><tr><th>Правило</th><th class='pue'>ПУЭ</th></tr><tr><td>Селективность ≥3×</td><td class='pue'>7.1.73</td></tr><tr><td>Без защиты от сверхтока — не отдельно</td><td class='pue'>7.1.76</td></tr><tr><td>Типы А и АС</td><td class='pue'>7.1.78</td></tr><tr><td>УЗО отключает L и N</td><td class='pue'>7.1.86</td></tr><tr><td>К одному УЗО — несколько линий через автоматы</td><td class='pue'>7.1.79</td></tr></table></div>",
+"<div class='warn-note'><b>Запрещено:</b> УЗО в 4-проводных трёхфазных цепях TN-C <span class='pue'>(1.7.80)</span>.</div>",
+"<div class='note'><b>10 мА</b> для ванных — требование СП 256, не ПУЭ-7. Но общепринято.</div>",
+"<h3>Схемы</h3><pre>Ввод 40 А → УЗО 300 мА → Автоматы
+  ├─ УЗО 30 мА A → розетки
+  ├─ УЗО 10 мА A → ванная
+  ├─ Автомат → кондиционер
+  └─ Автомат → плита</pre>"]},
+{c:"Распределительные щиты",i:"📦",d:[
+"<h3>Вводные устройства</h3><ul class='tight'><li>380/220 В, TN-S или TN-C-S <span class='pue'>(7.1.13)</span></li><li>ВУ не нужен при ответвлении ≤25 А и расст. ≤3м</li><li>Вне электрощитовых — не ниже IP31 <span class='pue'>(7.1.28)</span></li></ul>",
+"<h3>Этажные / квартирные щитки</h3><ul class='tight'><li>Этажный — не далее 3 м от стояка <span class='pue'>(7.1.27)</span></li><li>Не под санузлами/мойками <span class='pue'>(7.1.29)</span></li><li>Огнестойкость 0,75 ч, двери наружу <span class='pue'>(7.1.28)</span></li><li>Счётчик — на щитке <span class='pue'>(7.1.63)</span></li><li>Отключающий аппарат счётчика — вне квартиры <span class='pue'>(7.1.64)</span></li></ul>",
+"<h3>Однолинейная схема (пример)</h3><pre>Ввод 220 В TN-C-S
+  └─ Авт. 40 А → Счётчик → УЗО 30мА/40А
+        ├─ Авт. 10 А → освещение 1,5
+        ├─ Авт. 16 А → розетки 2,5
+        ├─ Авт. 16 А → кухня 2,5
+        ├─ УЗО 10 мА → ванная 2,5
+        ├─ Авт. 32 А → плита 6
+        └─ Авт. 16 А → резерв 2,5</pre>"]},
+{c:"Розетки и выключатели",i:"💡",d:[
+"<h3>Высоты установки</h3><div class='tbl-scroll'><table><tr><th>Устройство</th><th class='num'>Высота</th><th class='pue'>ПУЭ</th></tr><tr><td>Розетки жилые</td><td class='num'>удобная, ≤1 м</td><td class='pue'>6.6.30</td></tr><tr><td>Розетки детские</td><td class='num'>1,8 м</td><td class='pue'>6.6.30</td></tr><tr><td>Выключатели</td><td class='num'>0,8–1,7 м</td><td class='pue'>6.6.31</td></tr><tr><td>Кухня (над столешницей)</td><td class='num'>1,1–1,2 м</td><td class='pue'>СП 256</td></tr></table></div>",
+"<h3>Расстояния</h3><div class='tbl-scroll'><table><tr><th>Правило</th><th class='num'>Норма</th><th class='pue'>ПУЭ</th></tr><tr><td>До газопровода</td><td class='num'>≥0,5 м</td><td class='pue'>7.1.50</td></tr><tr><td>Ванная — зона 3, УЗО ≤30 мА</td><td class='num'>—</td><td class='pue'>7.1.48</td></tr><tr><td>От двери душевой</td><td class='num'>≥0,6 м</td><td class='pue'>7.1.48</td></tr><tr><td>Выключатель — только в фазу</td><td class='num'>—</td><td class='pue'>6.6.28</td></tr></table></div>",
+"<h3>Типы розеток</h3><ul class='tight'><li>2P+PE 16А — стандартная</li><li>3P+PE 380В — трёхфазные</li><li>С шторками — детские</li><li>IP44+ — ванные, балконы</li><li>32А — электроплиты</li></ul>",
+"<div class='note'><b>Число розеток (СП 256):</b> жилая 12–18м² — 4 шт.; кухня — 6–8; ванная — 1–2 (зона 3).</div>"]},
+{c:"Освещение",i:"🔦",d:[
+"<h3>Нормы освещённости <span class='pue'>(СП 52.13330)</span></h3><div class='tbl-scroll'><table><tr><th>Помещение</th><th class='num'>лк</th></tr><tr><td>Жилая комната</td><td class='num'>150</td></tr><tr><td>Кухня</td><td class='num'>150</td></tr><tr><td>Детская</td><td class='num'>200</td></tr><tr><td>Кабинет</td><td class='num'>300</td></tr><tr><td>Ванная</td><td class='num'>50</td></tr><tr><td>Коридор</td><td class='num'>50</td></tr></table></div>",
+"<h3>Требования к светильникам <span class='pue'>(6.6)</span></h3><ul class='tight'><li>Высота ≤5м (обслуживание со стремянок) <span class='pue'>(6.6.2)</span></li><li>Крепление на 5× массу <span class='pue'>(6.6.9)</span></li><li>Винтовая гильза — к N <span class='pue'>(6.6.10)</span></li></ul>",
+"<h3>Питание освещения</h3><ul class='tight'><li>Лестницы, коридоры — только от ВРУ <span class='pue'>(7.1.32)</span></li><li>Корпуса — заземление PE <span class='pue'>(6.1.38)</span></li><li>На одной фазе — ≤20 ламп <span class='pue'>(6.2.10)</span></li></ul>",
+"<h3>Типы ламп</h3><ul class='tight'><li><b>LED</b> — низкое потребление, долговечность</li><li>Люминесцентные — экономичны, содержат ртуть</li><li>Накаливания — дёшево, нагрев</li></ul>"]},
+{c:"Ванная комната",i:"🚿",d:[
+"<h3>Зоны ванной</h3><div class='tbl-scroll'><table><tr><th>Зона</th><th>Границы</th><th class='num'>IP</th><th>Оборудование</th></tr><tr><td><b>0</b></td><td>Внутри ванны</td><td class='num'>IPx7</td><td>≤12 В</td></tr><tr><td><b>1</b></td><td>Над ванной до 2,25м</td><td class='num'>IPx5</td><td>Водонагреватели</td></tr><tr><td><b>2</b></td><td>+0,6м от зоны 1</td><td class='num'>IPx4</td><td>Водонагр., светильники II</td></tr><tr><td><b>3</b></td><td>Остальное</td><td class='num'>IPx1</td><td>Розетки (квартиры)</td></tr></table></div>",
+"<div class='warn-note'><b>Зоны 0–2:</b> запрещены распред. устройства и органы управления <span class='pue'>(7.1.47)</span>.</div>",
+"<h3>Розетки в ванной</h3><ul class='tight'><li>Только <b>зона 3</b></li><li>Через УЗО ≤30 мА или трансформатор <span class='pue'>(7.1.48)</span></li><li>IP44+, ≥0,6м от двери душевой</li></ul>",
+"<h3>Уравнивание потенциалов <span class='badge b-dng'>обязательно</span></h3><ul class='tight'><li>Все открытые проводящие части + PE</li><li>Трубы водопровода, канализации, отопления, газа <span class='pue'>(7.1.88, 1.7.82)</span></li><li>Местное уравнивание запрещено</li></ul>",
+"<p style='font-size:12px'>Сечения: Cu ≥2,5 мм² (с мех. защитой) / ≥4 мм² (без) <span class='pue'>(1.7.127)</span>; основная система: Cu ≥6 мм² <span class='pue'>(1.7.137)</span>.</p>"]},
+{c:"Заземление и PE",i:"⚙️",d:[
+"<h3>PE-проводник — табл. 1.7.5</h3><div class='tbl-scroll'><table><tr><th>S фазы, мм²</th><th>S PE</th></tr><tr><td>S≤16</td><td><b>S</b></td></tr><tr><td>16&lt;S≤35</td><td><b>16</b></td></tr><tr><td>S&gt;35</td><td><b>S/2</b></td></tr></table></div>",
+"<h3>PEN-проводник</h3><ul class='tight'><li>Многофазные: Cu ≥10 / Al ≥16 мм² <span class='pue'>(1.7.131)</span></li><li>Однофазные: PEN <b>запрещён</b> <span class='pue'>(1.7.132)</span></li><li>После разделения обратное объединение запрещено <span class='pue'>(1.7.135)</span></li><li>Коммутация в PE/PEN запрещена <span class='pue'>(1.7.145)</span></li></ul>",
+"<h3>Сопротивления</h3><div class='tbl-scroll'><table><tr><th>Ситуация</th><th class='num'>Ом</th><th class='pue'>ПУЭ</th></tr><tr><td>Заземлитель нейтрали 220/380</td><td class='num'>30/4</td><td class='pue'>1.7.101</td></tr><tr><td>Повторный PEN</td><td class='num'>30</td><td class='pue'>1.7.103</td></tr><tr><td>Все повторные вместе</td><td class='num'>10</td><td class='pue'>1.7.103</td></tr><tr><td>TT: Ra×Ia</td><td class='num'>≤50 В</td><td class='pue'>1.7.59</td></tr></table></div>",
+"<h3>Время отключения — табл. 1.7.1</h3><div class='tbl-scroll'><table><tr><th>U₀, В</th><th class='num'>127</th><th class='num'>220</th><th class='num'>380</th><th class='num'>&gt;380</th></tr><tr><td><b>с</b></td><td class='num'>0,8</td><td class='num'><b>0,4</b></td><td class='num'>0,2</td><td class='num'>0,1</td></tr></table></div>",
+"<h3>Контур частного дома</h3><div class='step'><div class='num'>1</div><div class='body'><b>Электроды</b><p>Сталь Ø≥12мм, ≥2,5м, ≥3 шт., расст. ≥5м <span class='pue'>(1.7.102)</span></p></div></div><div class='step'><div class='num'>2</div><div class='body'><b>Перемычки</b><p>Сварка / болты по ГОСТ 10434</p></div></div><div class='step'><div class='num'>3</div><div class='body'><b>К щиту</b><p>Cu ≥10 мм² / сталь ≥75 мм² <span class='pue'>(1.7.117)</span></p></div></div>",
+"<div class='note'><b>ГЗШ:</b> медью, ≥ сечения PE(PEN), в ВРУ <span class='pue'>(1.7.119)</span>; присоединяются трубы, каркас, вентиляция, молниезащита.</div>"]}
+];
+
+var curTab="pRef";
+
+// ====== Nav ======
+function sP(id,b){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('a'));document.getElementById(id).classList.add('a');document.querySelectorAll('.nbtn').forEach(x=>x.classList.remove('a'));if(b)b.classList.add('a');curTab=id;window.scrollTo(0,0)}
+
+// ====== Build sections ======
+function bSec(){
+  var c=document.getElementById('sections');
+  var titles=['Системы заземления','Выбор проводников','Электропроводки','Автоматы и защита','УЗО и диффавтоматы','Распред. щиты','Розетки и выключатели','Освещение','Ванная комната','Заземление и PE'];
+  SD.forEach(function(sec,si){
+    var h='';sec.d.forEach(function(item){h+=item});
+    var el=document.createElement('div');el.className='cat';el.id='sec_'+si;
+    el.innerHTML='<div class="cat-h" onclick="tSec('+si+')"><h2>'+sec.i+' '+(si+1)+'. '+titles[si]+'</h2><span class="arr" id="aSec'+si+'">▼</span></div><div class="cat-b" id="bSec'+si+'">'+h+'</div>';
+    c.appendChild(el);
+  });
+}
+function tSec(i){document.getElementById('bSec'+i).classList.toggle('open');document.getElementById('aSec'+i).parentElement.classList.toggle('a')}
+function expAll(){SD.forEach(function(_,i){var b=document.getElementById('bSec'+i);b.classList.add('open');document.getElementById('aSec'+i).parentElement.classList.add('a')})}
+function colAll(){SD.forEach(function(_,i){var b=document.getElementById('bSec'+i);b.classList.remove('open');document.getElementById('aSec'+i).parentElement.classList.remove('a')})}
+
+// ====== Search ======
+var sTimer=null;
+document.getElementById('search').addEventListener('input',function(){
+  var q=this.value.trim().toLowerCase();
+  clearTimeout(sTimer);
+  sTimer=setTimeout(function(){
+    var el=document.getElementById('sResults');
+    if(!q){el.innerHTML='<span style="color:var(--mut)">Введите запрос для поиска по всем разделам</span>';return}
+    var found=[],titles=['Системы заземления','Выбор проводников','Электропроводки','Автоматы и защита','УЗО и диффавтоматы','Распред. щиты','Розетки и выключатели','Освещение','Ванная комната','Заземление и PE'];
+    SD.forEach(function(sec,si){var txt=sec.c+' '+sec.d.join(' ').toLowerCase();if(txt.indexOf(q)>=0)found.push(si)});
+    if(!found.length){el.innerHTML='<span style="color:var(--mut)">Ничего не найдено</span>';return}
+    var html='';
+    found.forEach(function(si){
+      html+='<div class="cat" style="margin-bottom:8px;cursor:pointer" onclick="goSec('+si+')">';
+      html+='<div class="cat-h"><h2>'+SD[si].i+' '+titles[si]+'</h2><span class="arr">▸</span></div></div>';
+    });
+    el.innerHTML=html;
+  },200);
+});
+function goSec(si){
+  sP('pRef',document.querySelectorAll('.nbtn')[0]);
+  setTimeout(function(){tSec(si);document.getElementById('sec_'+si).scrollIntoView({behavior:'smooth',block:'start'})},100);
+}
+
+// ====== Calculators ======
+var wireData=[{s:1.5,tube:15,open:23},{s:2.5,tube:21,open:30},{s:4,tube:28,open:41},{s:6,tube:36,open:50},{s:10,tube:50,open:80},{s:16,tube:70,open:100},{s:25,tube:95,open:140}];
+var breakers=["6","10","13","16","20","25","32","40","50","63"];
+function calcWire(){
+  var pw=parseFloat(document.getElementById('calcP').value)||0;
+  var net=document.getElementById('calcNet').value;
+  var cos=parseFloat(document.getElementById('calcCos').value)||0.95;
+  var hide=document.getElementById('calcHide').value;
+  var long=document.getElementById('calcLong').checked;
+  var out=document.getElementById('resWire');
+  if(pw<=0){out.innerHTML='Введите мощность.';return}
+  var I=net==='1'?(pw*1000)/(220*cos):(pw*1000)/(Math.sqrt(3)*380*cos);
+  if(long)I*=1.3;
+  var Idop=I*1.1;
+  var sel=null;
+  for(var i=0;i<wireData.length;i++){var Id=hide==='0'?wireData[i].open:wireData[i].tube;if(Id>=Idop){sel=wireData[i];break}}
+  if(!sel){out.innerHTML='<span class="dng">Превышение — используйте несколько линий.</span>';return}
+  var rec=null;
+  for(var j=0;j<breakers.length;j++){var b=parseFloat(breakers[j]);if(b>=I&&b<=(hide==='0'?sel.open:sel.tube)){rec=b;break}}
+  var html='<b>Ток:</b> '+I.toFixed(1)+' А';
+  html+='<br><b>Cu:</b> '+sel.s+' мм²';
+  html+='<br><b>Автомат:</b> '+(rec?rec+' А тип C':'по расчёту');
+  html+='<br><span class="ok">'+sel.s+'мм² выдерживает '+(hide==='0'?sel.open:sel.tube)+' А ✓</span>';
+  out.innerHTML=html;
+}
+function calcDrop(){
+  var L=parseFloat(document.getElementById('dropL').value)||0;
+  var I=parseFloat(document.getElementById('dropI').value)||0;
+  var S=parseFloat(document.getElementById('dropS').value);
+  var U=parseFloat(document.getElementById('dropU').value);
+  var out=document.getElementById('resDrop');
+  if(L<=0||I<=0){out.innerHTML='Введите длину и ток.';return}
+  var dU=2*L*I*0.0175/S;
+  var pct=dU/U*100;
+  var ok=pct<=5;
+  out.innerHTML='<b>Падение:</b> '+dU.toFixed(2)+' В ('+pct.toFixed(1)+'%)<br><b>'+(ok?'<span class="ok">Допустимо ≤5% ✓</span>':'<span class="dng">Превышает 5% ✗</span>')+'</b>';
+}
+function calcUzo(){
+  var inA=parseFloat(document.getElementById('uzoIn').value);
+  var out=document.getElementById('resUzo');
+  var uzoNom=null;
+  var tbl=[["6","16"],["10","25"],["16","25"],["20","25"],["25","40"],["32","40"],["40","63"],["63","63"]];
+  for(var i=0;i<tbl.length;i++){if(parseFloat(tbl[i][0])===inA){uzoNom=tbl[i][1];break}}
+  var rec=inA>=32?"30 мА тип A (или без для плиты)":"10/30 мА, тип A";
+  out.innerHTML='<b>УЗО:</b> IΔn '+rec+'<br><b>Номинал УЗО:</b> ≥'+uzoNom+' А<br><b>Селективность:</b> вышестоящее ≥ 3× (7.1.73)';
+}
+
+// ====== PWA ======
+var dP=null;
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(){})}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dP=e;if(!localStorage.getItem('id'))document.getElementById('iBan').classList.add('show')});
+function instApp(){if(!dP)return;dP.prompt();dP.userChoice.then(function(){document.getElementById('iBan').classList.remove('show');dP=null})}
+function disInst(){document.getElementById('iBan').classList.remove('show');localStorage.setItem('id','1')}
+window.addEventListener('online',function(){document.getElementById('offlineBanner').classList.remove('show')});
+window.addEventListener('offline',function(){document.getElementById('offlineBanner').classList.add('show')});
+if(!navigator.onLine)document.getElementById('offlineBanner').classList.add('show');
+
+function ts(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('s');setTimeout(function(){t.classList.remove('s')},2000)}
+
+// ====== Кондиционеры: выбор количества ======
+function onCond(){
+  var el=document.getElementById('condCount');
+  if(!el)return;
+  var n=parseInt(el.value)||0;
+  var tb=document.getElementById('condRows');
+  tb.innerHTML='';
+  for(var i=1;i<=n;i++){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>Кондиционер №'+i+'</td><td class="num">C16</td><td class="num">2,5</td><td>30 мА</td>';
+    tb.appendChild(tr);
+  }
+  var s=document.getElementById('condSum');
+  var note=document.getElementById('condNote');
+  if(n===0){s.textContent='нет';note.textContent='Разделить кондиционеры по разным линиям (по фазе), каждый через отдельный автомат и УЗО 30 мА.';return}
+  var kw=n*3.5;
+  s.textContent=n+' × 3,5 кВт ≈ '+kw.toLocaleString('ru-RU')+' кВт';
+  note.textContent='Каждый кондиционер — отдельная линия C16 / 2,5 мм² + УЗО 30 мА. Трёхфазный ввод: распределите линии по фазам L1/L2/L3.';
+}
+
+// Init
+bSec();
+onCond();
+window.addEventListener('load',function(){setTimeout(function(){document.getElementById('splash').classList.add('hide')},300)});
+</script>
+</body>
+</html>
