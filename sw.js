@@ -1,7 +1,7 @@
-/* Справочник электромонтажника — Service Worker
+/* ПУЭ/ГОСТ — Service Worker
    Стратегия: cache-first для статики приложения, network-first для всего остального. */
 
-const CACHE_NAME = 'electro-spravochnik-v2';
+const CACHE_NAME = 'electro-spravochnik-v4';
 const APP_SHELL = [
   './',
   './index.html',

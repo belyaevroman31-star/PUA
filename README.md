@@ -1,4 +1,4 @@
-# ⚡ Справочник электромонтажника — PWA
+# ⚡ ПУЭ/ГОСТ — PWA
 
 Офлайн-приложение (Progressive Web App) с нормами электромонтажа в квартирах и частных домах.
 
@@ -22,6 +22,7 @@
 ├── sw.js                   # service worker (офлайн-кеш)
 ├── icons/
 │   ├── icon-192.png
+│   ├── icon-192x192.svg
 │   ├── icon-512.png
 │   ├── icon-maskable-512.png
 │   └── apple-touch-icon.png
@@ -38,7 +39,7 @@
 ```bash
 git init
 git add .
-git commit -m "PWA: справочник электромонтажника"
+git commit -m "PWA: ПУЭ/ГОСТ"
 git branch -M main
 git remote add origin https://github.com/<ВАШ-НИК>/<РЕПО>.git
 git push -u origin main
@@ -74,7 +75,7 @@ npx serve pwa
 
 ## 🔁 Обновление приложения
 
-При каждом пуше меняйте версию кеша в `sw.js` (`const CACHE_NAME = 'electro-spravochnik-v2'` → `-v3`, ...). Service worker автоматически обновит кеш у всех пользователей.
+При каждом пуше меняйте версию кеша в `sw.js` (`const CACHE_NAME = 'electro-spravochnik-v4'` → `-v4`, ...). Service worker автоматически обновит кеш у всех пользователей.
 
 ---
 

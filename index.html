@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#0d0f13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Электросово">
-<meta name="description" content="Офлайн-справочник по нормам электромонтажа в квартирах и частных домах. ПУЭ-7, ГОСТ Р 50571, СП 256.">
+<meta name="apple-mobile-web-app-title" content="ПУЭ/ГОСТ">
+<meta name="description" content="ПУЭ/ГОСТ — офлайн-справочник по нормам электромонтажа в квартирах и частных домах. ПУЭ-7, ГОСТ Р 50571, СП 256.">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon-192x192.svg">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<title>Справочник электромонтажника</title>
+<title>ПУЭ/ГОСТ</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -29,10 +29,12 @@ body{
   background:radial-gradient(ellipse at top left,rgba(245,180,0,.06),transparent 45%),
   radial-gradient(ellipse at bottom right,rgba(193,122,74,.07),transparent 50%),var(--bg);
   color:var(--txt);font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  padding:16px 16px calc(72px + var(--safe-b));
+  padding:calc(92px + env(safe-area-inset-top)) 16px calc(72px + var(--safe-b));
   min-height:100vh;min-height:100dvh;
   -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
 }
+.tbrand{position:fixed;top:0;left:0;right:0;z-index:85;height:74px;display:flex;align-items:center;justify-content:center;padding-top:env(safe-area-inset-top);background:linear-gradient(180deg,rgba(13,15,19,.96),rgba(13,15,19,.82) 72%,transparent);pointer-events:none;text-align:center;user-select:none}
+.tbrand span{color:var(--am);font-size:clamp(24px,6.5vw,38px);font-weight:900;letter-spacing:.24em;text-indent:.24em;text-shadow:0 0 26px rgba(245,180,0,.4)}
 .app{max-width:700px;margin:0 auto}
 
 .splash{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s}
@@ -40,7 +42,7 @@ body{
 .splash svg{width:80px;height:80px;margin-bottom:16px}
 .splash p{color:var(--mut);font-size:14px;font-weight:600}
 
-.offline-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:80;background:var(--dng);color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:600}
+.offline-banner{display:none;position:fixed;top:calc(80px + env(safe-area-inset-top));left:14px;right:14px;z-index:84;background:var(--dng);color:#fff;text-align:center;padding:8px;border-radius:10px;font-size:13px;font-weight:600}
 .offline-banner.show{display:block}
 
 .install-banner{display:none;position:fixed;bottom:calc(68px + var(--safe-b));left:12px;right:12px;background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--am);border-radius:14px;padding:16px;z-index:100;box-shadow:0 8px 30px rgba(245,180,0,.2)}
@@ -190,6 +192,23 @@ mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius
 .calc button{margin-top:12px;background:var(--am);color:#0d0f13;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%}
 .calc button:active{transform:scale(.97)}
 
+/* ---- Сечение кабеля (справочник + калькулятор) ---- */
+#kcTable{min-width:600px}
+.kc-g{text-align:center;white-space:nowrap}
+.kc-g.closed{color:var(--blue)}
+.sec-badge{min-width:78px;text-align:center;padding:10px 12px;border-radius:10px;background:linear-gradient(180deg,var(--amb),var(--am));color:#0d0f13}
+.sec-badge b{display:block;font-size:22px;line-height:1.1}
+.sec-badge span{font-size:10px;opacity:.85}
+.resbox{background:rgba(245,180,0,.06);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:12px;line-height:1.6}
+.resbox b{color:var(--amb)}
+.resbox ul{margin:10px 0 0;padding-left:18px}
+.resbox ul li{margin:4px 0}
+.sw-cu,.sw-al,.sw-o,.sw-c{display:inline-block;width:12px;height:12px;border-radius:3px;flex:none}
+.sw-cu{background:#c96f1b}
+.sw-al{background:#8a93a3}
+.sw-o{background:repeating-linear-gradient(45deg,#f5b301 0 5px,#1d1d1f 5px 10px)}
+.sw-c{background:repeating-linear-gradient(135deg,#4a90d9 0 5px,#173f78 5px 10px)}
+
 .radio-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .radio-row label{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--mut);cursor:pointer}
 
@@ -199,7 +218,7 @@ mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius
   body{background:#fff;color:#000;padding:10px}
   .card,.pnl{background:#fff;border:1px solid #ddd}
   .cat-h{background:#f5f5f5;color:#000}
-  .bnav,.install-banner,.acts,.sw,.offline-banner,.splash{display:none!important}
+  .bnav,.install-banner,.acts,.sw,.offline-banner,.splash,.tbrand{display:none!important}
   .cat-b{max-height:none!important;padding:12px!important}
   th{color:#333;background:#eee}
   table{background:#fff}
@@ -208,9 +227,11 @@ mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius
 </head>
 <body>
 
+<div class="tbrand"><span>BELYAEV_PROJECT</span></div>
+
 <div class="splash" id="splash">
-  <svg viewBox="0 0 192 192" fill="none"><rect width="192" height="192" rx="40" fill="#161920"/><path d="M100 30L80 100l30 0-25 65 35-75-30 0z" fill="#f5b400"/></svg>
-  <p>Справочник электромонтажника</p>
+  <svg viewBox="0 0 192 192" fill="none"><rect width="192" height="192" rx="40" fill="#161920"/><path d="M100 30L80 100l30 0-25 65 35-75-30 0z" fill="#f5b400"/><text x="96" y="188" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="20" font-weight="700" fill="#f5b400">ПУЭ/ГОСТ</text></svg>
+  <p>ПУЭ/ГОСТ</p>
 </div>
 
 <div class="offline-banner" id="offlineBanner">Нет соединения — справочник доступен офлайн</div>
@@ -220,8 +241,8 @@ mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius
 <!-- ==================== PAGE: СПРАВОЧНИК ==================== -->
 <div class="pg a" id="pRef">
   <header>
-    <p class="eye">Электромонтаж · ПУЭ-7</p>
-    <h1>Справочник электромонтажника</h1>
+    <p class="eye">Электромонтаж · ПУЭ-7 · ГОСТ</p>
+    <h1>ПУЭ/ГОСТ</h1>
     <p class="sub">Нормы для квартир и частных домов</p>
   </header>
   <svg class="wire" viewBox="0 0 1000 10" preserveAspectRatio="none"><line x1="0" y1="5" x2="1000" y2="5" stroke="#c17a4a" stroke-width="1" stroke-dasharray="2 6"/><circle cx="20" cy="5" r="2.5" fill="#f5b400"/><circle cx="500" cy="5" r="2.5" fill="#c17a4a"/><circle cx="980" cy="5" r="2.5" fill="#f5b400"/></svg>
@@ -263,6 +284,87 @@ mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius
     <p class="eye">Инструменты</p>
     <h1>Калькуляторы</h1>
   </header>
+
+  <div class="card">
+    <h3>Сечение кабеля: справочник и калькулятор <span class="pue">(по ПУЭ)</span></h3>
+
+    <div class="tg" id="kcTabTg">
+      <button class="mbtn a" data-kc-tab="ref" onclick="kcTab('ref')">Справочная таблица</button>
+      <button class="mbtn" data-kc-tab="calc" onclick="kcTab('calc')">Калькулятор</button>
+      <span class="th"></span>
+    </div>
+
+    <div class="tg" id="kcMatTg" style="margin-top:10px">
+      <button class="mbtn a" data-kc-mat="cu" onclick="kcMat('cu')">Медь</button>
+      <button class="mbtn" data-kc-mat="al" onclick="kcMat('al')">Алюминий</button>
+      <span class="th"></span>
+    </div>
+
+    <div class="tg-h">Допустимые токовые нагрузки проводов и кабелей при напряжении 220 В и 380 В. Открытая и скрытая прокладка.</div>
+
+    <div id="kcViewRef">
+      <div class="tbl-scroll">
+        <table id="kcTable">
+          <thead>
+            <tr>
+              <th rowspan="2">Сечение, мм²</th>
+              <th colspan="3" class="kc-g open">Открытая проводка</th>
+              <th colspan="3" class="kc-g closed">Скрытая проводка</th>
+            </tr>
+            <tr>
+              <th class="num">Ток, А</th><th class="num">220 В, кВт</th><th class="num">380 В, кВт</th>
+              <th class="num">Ток, А</th><th class="num">220 В, кВт</th><th class="num">380 В, кВт</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin-top:8px">
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="sw sw-cu"></i> Медь</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="sw sw-al"></i> Алюминий</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="sw sw-o"></i> Открытая (воздух, кабель-канал)</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="sw sw-c"></i> Скрытая (стена, труба, грунт)</span>
+      </div>
+      <p class="pue" style="margin-top:8px">«—» — не применяется (сечения ниже 2 мм² не используются для силовых сетей) либо данные не нормируются. Мощность при 380 В — упрощённая оценка P ≈ I×380 (без учёта cos φ).</p>
+    </div>
+
+    <div id="kcViewCalc" style="display:none">
+      <div class="tg" id="kcModeTg">
+        <button class="mbtn a" data-kc-mode="pw" onclick="kcMode('pw')">По мощности, кВт</button>
+        <button class="mbtn" data-kc-mode="cur" onclick="kcMode('cur')">По току, А</button>
+        <span class="th"></span>
+      </div>
+      <div class="calc" style="margin-top:12px">
+        <div>
+          <label id="kcLbl">Мощность нагрузки, кВт</label>
+          <input id="kcVal" type="number" min="0" step="any" placeholder="Например: 5.5">
+        </div>
+        <div>
+          <label>Материал жилы</label>
+          <select id="kcMat">
+            <option value="cu">Медь</option>
+            <option value="al">Алюминий</option>
+          </select>
+        </div>
+        <div>
+          <label>Способ прокладки</label>
+          <select id="kcLay">
+            <option value="open">Открытая (воздух, кабель-канал)</option>
+            <option value="closed">Скрытая (стена, труба, грунт)</option>
+          </select>
+        </div>
+        <div>
+          <label>Напряжение сети</label>
+          <select id="kcVolt">
+            <option value="220">220 В (однофазная)</option>
+            <option value="380">380 В (трёхфазная)</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn bp bf" onclick="kcCalc()">Рассчитать сечение</button>
+      <div class="resbox" id="kcRes" style="display:none;margin-top:12px"></div>
+    </div>
+  </div>
 
   <div class="card">
     <h3>Подбор сечения и автомата</h3>
@@ -392,7 +494,7 @@ mark{background:rgba(245,180,0,.25);color:var(--amb);padding:0 2px;border-radius
 
 </div><!-- .app -->
 
-<div class="install-banner" id="iBan"><p>Установить справочник на экран?</p><div class="row"><button class="inst" onclick="instApp()">Установить</button><button class="inst2" onclick="disInst()">Позже</button></div></div>
+<div class="install-banner" id="iBan"><p>Установить ПУЭ/ГОСТ на экран?</p><div class="row"><button class="inst" onclick="instApp()">Установить</button><button class="inst2" onclick="disInst()">Позже</button></div></div>
 <div class="toast" id="toast"></div>
 
 <nav class="bnav">
@@ -564,6 +666,101 @@ function calcUzo(){
   out.innerHTML='<b>УЗО:</b> IΔn '+rec+'<br><b>Номинал УЗО:</b> ≥'+uzoNom+' А<br><b>Селективность:</b> вышестоящее ≥ 3× (7.1.73)';
 }
 
+// ====== Сечение кабеля: справочник + калькулятор (по данным таблицы, ПУЭ) ======
+var kcRows=[
+  {s:"0.5",o:{cu:{i:11,p220:2.4,p380:null},al:{i:null,p220:null,p380:null}},c:{cu:{i:null,p220:null,p380:null},al:{i:null,p220:null,p380:null}}},
+  {s:"0.75",o:{cu:{i:15,p220:3.3,p380:null},al:{i:null,p220:null,p380:null}},c:{cu:{i:null,p220:null,p380:null},al:{i:null,p220:null,p380:null}}},
+  {s:"1.0",o:{cu:{i:17,p220:3.7,p380:6.4},al:{i:null,p220:null,p380:null}},c:{cu:{i:14,p220:3.0,p380:5.3},al:{i:null,p220:null,p380:null}}},
+  {s:"1.5",o:{cu:{i:23,p220:5.0,p380:8.7},al:{i:null,p220:null,p380:null}},c:{cu:{i:15,p220:3.3,p380:5.7},al:{i:null,p220:null,p380:null}}},
+  {s:"2.0",o:{cu:{i:26,p220:5.7,p380:9.8},al:{i:21,p220:4.6,p380:7.9}},c:{cu:{i:19,p220:4.1,p380:7.2},al:{i:14,p220:3.0,p380:5.3}}},
+  {s:"2.5",o:{cu:{i:30,p220:6.6,p380:11.0},al:{i:24,p220:5.2,p380:9.1}},c:{cu:{i:21,p220:4.6,p380:7.9},al:{i:16,p220:3.5,p380:6.0}}},
+  {s:"4.0",o:{cu:{i:41,p220:9.0,p380:15.0},al:{i:32,p220:7.0,p380:12.0}},c:{cu:{i:27,p220:5.9,p380:10.0},al:{i:21,p220:4.6,p380:7.9}}},
+  {s:"6.0",o:{cu:{i:50,p220:11.0,p380:19.0},al:{i:39,p220:8.5,p380:14.0}},c:{cu:{i:34,p220:7.4,p380:12.0},al:{i:26,p220:5.7,p380:9.8}}},
+  {s:"10.0",o:{cu:{i:80,p220:17.0,p380:30.0},al:{i:60,p220:13.0,p380:22.0}},c:{cu:{i:50,p220:11.0,p380:19.0},al:{i:38,p220:8.3,p380:14.0}}},
+  {s:"16.0",o:{cu:{i:100,p220:22.0,p380:38.0},al:{i:75,p220:16.0,p380:28.0}},c:{cu:{i:80,p220:17.0,p380:30.0},al:{i:55,p220:12.0,p380:20.0}}},
+  {s:"25.0",o:{cu:{i:140,p220:30.0,p380:53.0},al:{i:105,p220:23.0,p380:39.0}},c:{cu:{i:100,p220:22.0,p380:38.0},al:{i:65,p220:14.0,p380:24.0}}},
+  {s:"35.0",o:{cu:{i:170,p220:37.0,p380:64.0},al:{i:130,p220:28.0,p380:49.0}},c:{cu:{i:135,p220:29.0,p380:51.0},al:{i:75,p220:16.0,p380:28.0}}}
+];
+var kcBreakers=[6,10,16,20,25,32,40,50,63,80,100,125,160,200];
+var kcMatNow="cu",kcModeNow="pw";
+
+function kcSeg(id,name,val){
+  var tg=document.getElementById(id);
+  var btns=tg.querySelectorAll('.mbtn');
+  var idx=-1;
+  for(var i=0;i<btns.length;i++){
+    var act=btns[i].getAttribute('data-'+name)===val;
+    btns[i].classList.toggle('a',act);
+    if(act)idx=i;
+  }
+  tg.classList.toggle('on',idx===btns.length-1);
+}
+function kcTab(v){kcSeg('kcTabTg','kc-tab',v);document.getElementById('kcViewRef').style.display=v==='calc'?'none':'';document.getElementById('kcViewCalc').style.display=v==='calc'?'':'none'}
+function kcMat(m){kcMatNow=m;kcSeg('kcMatTg','kc-mat',m);kcRender()}
+function kcMode(m){
+  kcModeNow=m;kcSeg('kcModeTg','kc-mode',m);
+  var lbl=document.getElementById('kcLbl'),inp=document.getElementById('kcVal');
+  if(m==='pw'){lbl.textContent='Мощность нагрузки, кВт';inp.placeholder='Например: 5.5'}else{lbl.textContent='Расчётный ток нагрузки, А';inp.placeholder='Например: 25'}
+}
+function kcDash(v){return v==null?'<td class="pue" style="text-align:center">&mdash;</td>':'<td class="num" style="color:var(--blue);font-weight:600">'+v+'</td>'}
+function kcRender(){
+  var tb=document.querySelector('#kcTable tbody'),html='';
+  for(var r=0;r<kcRows.length;r++){
+    var row=kcRows[r],cells='';
+    for(var k=0;k<2;k++){
+      var kind=k===0?'o':'c';
+      var m=row[kind][kcMatNow];
+      cells+=kcDash(m.i)+kcDash(m.p220)+kcDash(m.p380);
+    }
+    html+='<tr><th>'+row.s+'</th>'+cells+'</tr>';
+  }
+  tb.innerHTML=html;
+}
+function kcFmt(x){return (Math.round(x*10)/10).toLocaleString('ru-RU')}
+function kcBreakerFor(cur,max){
+  for(var i=0;i<kcBreakers.length;i++){var b=kcBreakers[i];if(b>=cur&&b<=max)return b}
+  return null;
+}
+function kcCalc(){
+  var box=document.getElementById('kcRes');
+  box.style.display='block';
+  var raw=parseFloat(document.getElementById('kcVal').value);
+  var mat=document.getElementById('kcMat').value;
+  var lay=document.getElementById('kcLay').value;
+  var volt=parseInt(document.getElementById('kcVolt').value,10);
+  var kind=lay==='open'?'o':'c';
+  if(!raw||raw<=0){box.innerHTML='<div class="warn-note">Введите положительное значение нагрузки.</div>';return}
+  var req=kcModeNow==='pw'?raw*1000/volt:raw;
+  var found=null;
+  for(var i=0;i<kcRows.length;i++){var ro=kcRows[i][kind][mat];if(ro&&ro.i>=req){found=kcRows[i];break}}
+  var matName=mat==='cu'?'медный':'алюминиевый';
+  var layName=lay==='open'?'открытая прокладка':'скрытая прокладка';
+  if(!found){
+    var maxA=kcRows[kcRows.length-1][kind][mat].i;
+    box.innerHTML='<div class="warn-note">Нагрузка '+kcFmt(req)+' А превышает допустимый ток для всех сечений таблицы ('+maxA+' А максимум). Возьмите кабель большего сечения — нужна кабельная линия большего пучка или расчёт по ПУЭ/ГОСТ.</div>';
+    return;
+  }
+  var row=found[kind][mat];
+  var p=row.i*volt/1000;
+  var brk=kcBreakerFor(req,row.i);
+  var html='<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
+    '<div class="sec-badge"><b>'+found.s+'</b><span>мм&sup2;</span></div>'+
+    '<div><b style="font-size:15px">Сечение: '+found.s+' мм&sup2; ('+matName+', '+layName+')</b>'+
+    '<p style="margin:6px 0 0;font-size:12px;color:var(--mut)">Расчётный ток: '+kcFmt(req)+' А &middot; Допустимый ток кабеля: '+row.i+' А</p></div>'+
+    '</div>'+
+    '<ul>'+
+      '<li>Допустимая мощность при напряжении '+volt+' В: <b>'+kcFmt(p)+' кВт</b></li>'+
+      (brk?'<li>Рекомендуемый автомат защиты: <b>на '+brk+' А</b> (ближайший стандартный номинал &ge; расчётного тока и &le; допустимого тока кабеля)</li>':'<li>Стандартного автомата, подходящего под эту нагрузку, в таблице нет — требуется индивидуальный подбор защиты.</li>')+
+      '<li>Запас по току кабеля: <b>'+kcFmt(((row.i-req)/req)*100)+'%</b></li>'+
+    '</ul>';
+  if(brk&&req>row.i*0.8){
+    html+='<div class="note" style="margin-top:12px;border-left-color:var(--am);background:rgba(245,180,0,.08);color:var(--amb)">Кабель выбран близко к пределу ('+kcFmt((req/row.i)*100)+'% от допустимого тока). Для длительной работы лучше взять сечение на ступень больше.</div>';
+  }else{
+    html+='<div class="note" style="margin-top:12px">Расчёт выполнен по справочной таблице (ПУЭ). Для критичных объектов — отдельный проект у специалиста.</div>';
+  }
+  box.innerHTML=html;
+}
+
 // ====== PWA ======
 var dP=null;
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(){})}
@@ -599,6 +796,8 @@ function onCond(){
 // Init
 bSec();
 onCond();
+kcRender();
+document.getElementById('kcVal').addEventListener('keydown',function(e){if(e.key==='Enter')kcCalc()});
 window.addEventListener('load',function(){setTimeout(function(){document.getElementById('splash').classList.add('hide')},300)});
 </script>
 </body>
