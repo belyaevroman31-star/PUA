@@ -439,22 +439,11 @@ var SD=[
 "<h3>Требования</h3><div class='tbl-scroll'><table><tr><th>Правило</th><th class='pue'>ПУЭ</th></tr><tr><td>Селективность ≥3×</td><td class='pue'>7.1.73</td></tr><tr><td>Без защиты от сверхтока — не отдельно</td><td class='pue'>7.1.76</td></tr><tr><td>Типы А и АС</td><td class='pue'>7.1.78</td></tr><tr><td>УЗО отключает L и N</td><td class='pue'>7.1.86</td></tr><tr><td>К одному УЗО — несколько линий через автоматы</td><td class='pue'>7.1.79</td></tr></table></div>",
 "<div class='warn-note'><b>Запрещено:</b> УЗО в 4-проводных трёхфазных цепях TN-C <span class='pue'>(1.7.80)</span>.</div>",
 "<div class='note'><b>10 мА</b> для ванных — требование СП 256, не ПУЭ-7. Но общепринято.</div>",
-"<h3>Схемы</h3><pre>Ввод 40 А → УЗО 300 мА → Автоматы
-  ├─ УЗО 30 мА A → розетки
-  ├─ УЗО 10 мА A → ванная
-  ├─ Автомат → кондиционер
-  └─ Автомат → плита</pre>"]},
+"<h3>Схемы</h3><pre>Ввод 40 А → УЗО 300 мА → Автоматы\n  ├─ УЗО 30 мА A → розетки\n  ├─ УЗО 10 мА A → ванная\n  ├─ Автомат → кондиционер\n  └─ Автомат → плита</pre>"]},
 {c:"Распределительные щиты",i:"📦",d:[
 "<h3>Вводные устройства</h3><ul class='tight'><li>380/220 В, TN-S или TN-C-S <span class='pue'>(7.1.13)</span></li><li>ВУ не нужен при ответвлении ≤25 А и расст. ≤3м</li><li>Вне электрощитовых — не ниже IP31 <span class='pue'>(7.1.28)</span></li></ul>",
 "<h3>Этажные / квартирные щитки</h3><ul class='tight'><li>Этажный — не далее 3 м от стояка <span class='pue'>(7.1.27)</span></li><li>Не под санузлами/мойками <span class='pue'>(7.1.29)</span></li><li>Огнестойкость 0,75 ч, двери наружу <span class='pue'>(7.1.28)</span></li><li>Счётчик — на щитке <span class='pue'>(7.1.63)</span></li><li>Отключающий аппарат счётчика — вне квартиры <span class='pue'>(7.1.64)</span></li></ul>",
-"<h3>Однолинейная схема (пример)</h3><pre>Ввод 220 В TN-C-S
-  └─ Авт. 40 А → Счётчик → УЗО 30мА/40А
-        ├─ Авт. 10 А → освещение 1,5
-        ├─ Авт. 16 А → розетки 2,5
-        ├─ Авт. 16 А → кухня 2,5
-        ├─ УЗО 10 мА → ванная 2,5
-        ├─ Авт. 32 А → плита 6
-        └─ Авт. 16 А → резерв 2,5</pre>"]},
+"<h3>Однолинейная схема (пример)</h3><pre>Ввод 220 В TN-C-S\n  └─ Авт. 40 А → Счётчик → УЗО 30мА/40А\n        ├─ Авт. 10 А → освещение 1,5\n        ├─ Авт. 16 А → розетки 2,5\n        ├─ Авт. 16 А → кухня 2,5\n        ├─ УЗО 10 мА → ванная 2,5\n        ├─ Авт. 32 А → плита 6\n        └─ Авт. 16 А → резерв 2,5</pre>"]},
 {c:"Розетки и выключатели",i:"💡",d:[
 "<h3>Высоты установки</h3><div class='tbl-scroll'><table><tr><th>Устройство</th><th class='num'>Высота</th><th class='pue'>ПУЭ</th></tr><tr><td>Розетки жилые</td><td class='num'>удобная, ≤1 м</td><td class='pue'>6.6.30</td></tr><tr><td>Розетки детские</td><td class='num'>1,8 м</td><td class='pue'>6.6.30</td></tr><tr><td>Выключатели</td><td class='num'>0,8–1,7 м</td><td class='pue'>6.6.31</td></tr><tr><td>Кухня (над столешницей)</td><td class='num'>1,1–1,2 м</td><td class='pue'>СП 256</td></tr></table></div>",
 "<h3>Расстояния</h3><div class='tbl-scroll'><table><tr><th>Правило</th><th class='num'>Норма</th><th class='pue'>ПУЭ</th></tr><tr><td>До газопровода</td><td class='num'>≥0,5 м</td><td class='pue'>7.1.50</td></tr><tr><td>Ванная — зона 3, УЗО ≤30 мА</td><td class='num'>—</td><td class='pue'>7.1.48</td></tr><tr><td>От двери душевой</td><td class='num'>≥0,6 м</td><td class='pue'>7.1.48</td></tr><tr><td>Выключатель — только в фазу</td><td class='num'>—</td><td class='pue'>6.6.28</td></tr></table></div>",
@@ -521,7 +510,11 @@ document.getElementById('search').addEventListener('input',function(){
 });
 function goSec(si){
   sP('pRef',document.querySelectorAll('.nbtn')[0]);
-  setTimeout(function(){tSec(si);document.getElementById('sec_'+si).scrollIntoView({behavior:'smooth',block:'start'})},100);
+  setTimeout(function(){
+    var b=document.getElementById('bSec'+si);
+    if(!b.classList.contains('open'))tSec(si);
+    document.getElementById('sec_'+si).scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
 }
 
 // ====== Calculators ======

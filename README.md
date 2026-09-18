@@ -74,7 +74,7 @@ npx serve pwa
 
 ## 🔁 Обновление приложения
 
-При каждом пуше меняйте версию кеша в `sw.js` (`const CACHE_NAME = 'electro-spravochnik-v1'` → `-v2`, ...). Service worker автоматически обновит кеш у всех пользователей.
+При каждом пуше меняйте версию кеша в `sw.js` (`const CACHE_NAME = 'electro-spravochnik-v2'` → `-v3`, ...). Service worker автоматически обновит кеш у всех пользователей.
 
 ---
 

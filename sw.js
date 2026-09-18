@@ -1,12 +1,13 @@
 /* Справочник электромонтажника — Service Worker
    Стратегия: cache-first для статики приложения, network-first для всего остального. */
 
-const CACHE_NAME = 'electro-spravochnik-v1';
+const CACHE_NAME = 'electro-spravochnik-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
+  './icons/icon-192x192.svg',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png'
